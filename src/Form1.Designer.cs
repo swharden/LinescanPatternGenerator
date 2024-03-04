@@ -28,7 +28,7 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
-            this.formsPlot1 = new ScottPlot.FormsPlot();
+            this.formsPlot1 = new ScottPlot.WinForms.FormsPlot();
             this.nudOscillationCount = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -189,7 +189,7 @@ partial class Form1
 
     #endregion
 
-    private ScottPlot.FormsPlot formsPlot1;
+    private ScottPlot.WinForms.FormsPlot formsPlot1;
     private NumericUpDown nudOscillationCount;
     private Label label1;
     private Label label2;

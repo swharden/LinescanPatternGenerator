@@ -47,8 +47,8 @@ public partial class Form1 : Form
         (double[] xs, double[] ys) = GetPoints();
 
         formsPlot1.Plot.Clear();
-        formsPlot1.Plot.AddScatter(xs, ys);
-        formsPlot1.Plot.SetAxisLimits(0, 1, 0, 1);
+        formsPlot1.Plot.Add.Scatter(xs, ys);
+        formsPlot1.Plot.Axes.SetLimits(0, 1, 0, 1);
         formsPlot1.Refresh();
     }
 
