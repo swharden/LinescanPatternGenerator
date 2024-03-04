@@ -1,4 +1,6 @@
-﻿namespace LinescanPatternGenerator.Patterns;
+﻿using System.Xml;
+
+namespace LinescanPatternGenerator.Patterns;
 
 public class Sine
 {
@@ -7,6 +9,8 @@ public class Sine
     public double WidthFrac { get; set; } = 0.5;
     public double HeightFrac { get; set; } = 0.1;
     public double RotationDegrees { get; set; } = 0;
+
+    public string Filename => $"linescan-sine-{Points}pt-{Oscillations}osc-{RotationDegrees}deg.xml";
 
     public (double[] xs, double[] ys) GetPoints()
     {
@@ -55,5 +59,17 @@ public class Sine
         }
 
         return (newX, newY);
+    }
+
+    public string GetXml()
+    {
+        (double[] xs, double[] ys) = GetPoints();
+        return PvXml.GetXml(xs, ys);
+    }
+
+    public void SaveXml(string path)
+    {
+        File.WriteAllText(path, GetXml());
+        Console.WriteLine("Saved:" + Path.GetFullPath(path));
     }
 }

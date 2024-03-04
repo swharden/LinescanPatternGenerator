@@ -2,7 +2,7 @@ namespace LinescanPatternGenerator;
 
 public partial class Form1 : Form
 {
-    public string XmlText = string.Empty;
+    readonly Patterns.Sine Pattern = new();
 
     public Form1()
     {
@@ -21,17 +21,13 @@ public partial class Form1 : Form
 
     private void UpdatePlot()
     {
-        Patterns.Sine pattern = new()
-        {
-            Points = (int)nudPointCount.Value,
-            Oscillations = (int)nudOscillationCount.Value,
-            WidthFrac = (int)nudWidthPercent.Value / 100.0,
-            HeightFrac = (double)nudAmplitudePercent.Value / 100.0,
-            RotationDegrees = (double)nudRotation.Value,
-        };
+        Pattern.Points = (int)nudPointCount.Value;
+        Pattern.Oscillations = (int)nudOscillationCount.Value;
+        Pattern.WidthFrac = (int)nudWidthPercent.Value / 100.0;
+        Pattern.HeightFrac = (double)nudAmplitudePercent.Value / 100.0;
+        Pattern.RotationDegrees = (double)nudRotation.Value;
 
-        (double[] xs, double[] ys) = pattern.GetPoints();
-        XmlText = PvXml.GetXml(xs, ys);
+        (double[] xs, double[] ys) = Pattern.GetPoints();
 
         formsPlot1.Plot.Clear();
         formsPlot1.Plot.Add.Scatter(xs, ys);
@@ -43,14 +39,13 @@ public partial class Form1 : Form
     {
         SaveFileDialog savefile = new()
         {
-            FileName = $"linescan.xml",
+            FileName = Pattern.Filename,
             Filter = "XML Files (*.xml)|*.xml|All files (*.*)|*.*"
         };
 
         if (savefile.ShowDialog() == DialogResult.OK)
         {
-            File.WriteAllText(savefile.FileName, XmlText);
-            Console.WriteLine(Path.GetFullPath(savefile.FileName));
+            Pattern.SaveXml(savefile.FileName);
         }
     }
 }
