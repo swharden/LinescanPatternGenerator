@@ -1,75 +1,35 @@
-﻿using System.Xml;
+﻿namespace LinescanPatternGenerator.Patterns;
 
-namespace LinescanPatternGenerator.Patterns;
-
-public class Sine
+public class Sine : IPattern
 {
     public int Points { get; set; } = 100;
     public int Oscillations { get; set; } = 10;
-    public double WidthFrac { get; set; } = 0.5;
+    public double WidthFrac { get; set; } = 0.8;
     public double HeightFrac { get; set; } = 0.1;
     public double RotationDegrees { get; set; } = 0;
 
+    public string Name => $"Sine (even X distances)";
     public string Filename => $"linescan-sine-{Points}pt-{Oscillations}osc-{RotationDegrees}deg.xml";
 
     public (double[] xs, double[] ys) GetPoints()
     {
-        double xStart = -WidthFrac / 2;
-        double xEnd = WidthFrac / 2;
-        double xSpan = xEnd - xStart;
-
-        double[] fracs = Enumerable.Range(0, Points)
-            .Select(i => (double)i / (Points - 1))
-            .ToArray();
-
-        double[] xs = fracs
-            .Select(frac => xStart + frac * xSpan)
-            .ToArray();
-
-        double[] ys = fracs
-            .Select(x => Math.Sin(x * Math.PI * 2 * Oscillations))
-            .Select(x => HeightFrac * x / 2)
-            .ToArray();
-
-        (xs, ys) = RotatePoints(xs, ys, RotationDegrees);
-
-        for (int i = 0; i < xs.Length; i++)
+        Coordinate[] coordinates = new Coordinate[Points];
+        for (int i = 0; i < Points; i++)
         {
-            xs[i] += .5;
-            ys[i] += .5;
+            double x = (double)i / (Points - 1);
+            double y = Math.Sin(x * Math.PI * 2 * Oscillations);
+            coordinates[i] = new(x, y);
+            coordinates[i].Rotate(RotationDegrees);
+            coordinates[i].Multiply(WidthFrac, HeightFrac / 2);
+            coordinates[i].Translate((1 - WidthFrac) / 2, .5);
         }
+
+        Coordinate.ShowDistances(coordinates);
+
+        double[] xs = coordinates.Select(x => x.X).ToArray();
+        double[] ys = coordinates.Select(x => x.Y).ToArray();
 
         return (xs, ys);
     }
 
-    public static (double[], double[]) RotatePoints(double[] x, double[] y, double angle)
-    {
-        double radians = Math.PI * angle / 180;
-
-        double[] newX = new double[x.Length];
-        double[] newY = new double[y.Length];
-
-        for (int i = 0; i < x.Length; i++)
-        {
-            double cosTheta = Math.Cos(radians);
-            double sinTheta = Math.Sin(radians);
-
-            newX[i] = x[i] * cosTheta - y[i] * sinTheta;
-            newY[i] = x[i] * sinTheta + y[i] * cosTheta;
-        }
-
-        return (newX, newY);
-    }
-
-    public string GetXml()
-    {
-        (double[] xs, double[] ys) = GetPoints();
-        return PvXml.GetXml(xs, ys);
-    }
-
-    public void SaveXml(string path)
-    {
-        File.WriteAllText(path, GetXml());
-        Console.WriteLine("Saved:" + Path.GetFullPath(path));
-    }
 }

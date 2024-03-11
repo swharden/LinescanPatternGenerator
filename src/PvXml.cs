@@ -2,8 +2,21 @@
 
 namespace LinescanPatternGenerator;
 
-public static class PvXml
+internal static class PvXml
 {
+    public static void SaveXml(IPattern pattern, string path)
+    {
+        string xml = GetXml(pattern);
+        File.WriteAllText(path, xml);
+        Console.WriteLine("Saved:" + Path.GetFullPath(path));
+    }
+
+    public static string GetXml(IPattern pattern)
+    {
+        (double[] xs, double[] ys) = pattern.GetPoints();
+        return GetXml(xs, ys);
+    }
+
     public static string GetXml(double[] xs, double[] ys)
     {
         StringBuilder sb = new();

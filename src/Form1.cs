@@ -2,7 +2,14 @@ namespace LinescanPatternGenerator;
 
 public partial class Form1 : Form
 {
-    readonly Patterns.Sine Pattern = new();
+    readonly IPattern[] Patterns = System.Reflection.Assembly.GetExecutingAssembly()
+        .GetTypes()
+        .Where(x => x.IsClass)
+        .Where(x => x.GetInterfaces().Contains(typeof(IPattern)))
+        .Select(x => (IPattern)Activator.CreateInstance(x)!)
+        .ToArray();
+
+    IPattern SelectedPattern => Patterns[cbPattern.SelectedIndex];
 
     public Form1()
     {
@@ -11,6 +18,13 @@ public partial class Form1 : Form
         ScottPlot.AxisRules.SquareZoomOut squareRule = new(formsPlot1.Plot.Axes.Bottom, formsPlot1.Plot.Axes.Left);
         formsPlot1.Plot.Axes.Rules.Add(squareRule);
 
+        foreach (IPattern pattern in Patterns)
+        {
+            cbPattern.Items.Add(pattern.Name);
+        }
+        cbPattern.SelectedIndex = 0;
+
+        cbPattern.SelectedIndexChanged += (s, e) => UpdatePlot();
         nudPointCount.ValueChanged += (s, e) => UpdatePlot();
         nudWidthPercent.ValueChanged += (s, e) => UpdatePlot();
         nudOscillationCount.ValueChanged += (s, e) => UpdatePlot();
@@ -21,13 +35,14 @@ public partial class Form1 : Form
 
     private void UpdatePlot()
     {
-        Pattern.Points = (int)nudPointCount.Value;
-        Pattern.Oscillations = (int)nudOscillationCount.Value;
-        Pattern.WidthFrac = (int)nudWidthPercent.Value / 100.0;
-        Pattern.HeightFrac = (double)nudAmplitudePercent.Value / 100.0;
-        Pattern.RotationDegrees = (double)nudRotation.Value;
+        SelectedPattern.Points = (int)nudPointCount.Value;
+        SelectedPattern.Oscillations = (int)nudOscillationCount.Value;
+        SelectedPattern.WidthFrac = (int)nudWidthPercent.Value / 100.0;
+        SelectedPattern.HeightFrac = (double)nudAmplitudePercent.Value / 100.0;
+        SelectedPattern.RotationDegrees = (double)nudRotation.Value;
 
-        (double[] xs, double[] ys) = Pattern.GetPoints();
+        (double[] xs, double[] ys) = SelectedPattern.GetPoints();
+        lblPoints.Text = $"{xs.Length:N0}";
 
         formsPlot1.Plot.Clear();
         formsPlot1.Plot.Add.Scatter(xs, ys);
@@ -37,15 +52,15 @@ public partial class Form1 : Form
 
     private void button1_Click(object sender, EventArgs e)
     {
-        SaveFileDialog savefile = new()
+        SaveFileDialog saveFileDialog = new()
         {
-            FileName = Pattern.Filename,
+            FileName = SelectedPattern.Filename,
             Filter = "XML Files (*.xml)|*.xml|All files (*.*)|*.*"
         };
 
-        if (savefile.ShowDialog() == DialogResult.OK)
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
         {
-            Pattern.SaveXml(savefile.FileName);
+            PvXml.SaveXml(SelectedPattern, saveFileDialog.FileName);
         }
     }
 }
