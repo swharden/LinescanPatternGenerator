@@ -30,7 +30,7 @@ internal class SineEven : IPattern
         for (int i = 0; i < smooth.Length; i++)
         {
             double x = (double)i / (smooth.Length - 1);
-            double y = Math.Sin(x * Math.PI * 2 * Oscillations);
+            double y = Math.Cos(x * Math.PI * 2 * Oscillations);
             smooth[i] = new(x, y);
             smooth[i].Rotate(RotationDegrees);
             smooth[i].Multiply(WidthFrac, HeightFrac / 2);

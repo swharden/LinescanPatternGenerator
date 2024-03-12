@@ -17,7 +17,7 @@ public class Sine : IPattern
         for (int i = 0; i < Points; i++)
         {
             double x = (double)i / (Points - 1);
-            double y = Math.Sin(x * Math.PI * 2 * Oscillations);
+            double y = Math.Cos(x * Math.PI * 2 * Oscillations);
             coordinates[i] = new(x, y);
             coordinates[i].Rotate(RotationDegrees);
             coordinates[i].Multiply(WidthFrac, HeightFrac / 2);
